@@ -1,0 +1,912 @@
+create table CLIENTI_PROIECT
+(
+  ID_CLIENT           NUMBER(6) not null,
+  prenume_client      VARCHAR2(20),
+  nume_client         VARCHAR2(20),
+  telefon_client      VARCHAR2(10) CONSTRAINT CLIENTI_TELEFON_UQ UNIQUE,
+  email_client        VARCHAR2(30),
+  data_nastere        DATE,
+  sex                 VARCHAR2(1)
+);
+alter table CLIENTI_PROIECT
+  add constraint CLIENTI_PROIECT_ID_CLIENT_PK primary key (ID_CLIENT);
+alter table CLIENTI_PROIECT
+  add constraint CLIENTI_PROIECT_NUME_NN
+  check ("NUME_CLIENT" IS NOT NULL);
+alter table CLIENTI_PROIECT
+  add constraint CLIENTI_PROIECT_PRENUME_NN
+  check ("PRENUME_CLIENT" IS NOT NULL);
+alter table CLIENTI_PROIECT
+  add constraint CLIENTI_PROIECT__EMAIL_CK CHECK (email_client LIKE '%@%.%');
+
+create table RETETE_PROIECT
+(
+  COD_RETETA        NUMBER(12) not null,
+  data_eliberarii   DATE,
+  tip_reteta        VARCHAR2(20),
+  diagnostic        VARCHAR2(20),
+  emitent           VARCHAR2(30),
+  nume_emitent      VARCHAR2(20),
+  ID_CLIENT         NUMBER(6) not null,
+constraint RETETE_DIAGNOSTIC_NN check (diagnostic IS NOT NULL),
+constraint RETETE_TIP_RETETA_CK check (tip_reteta in ('compensata','necompensata','gratuita'))
+);
+alter table RETETE_PROIECT
+  add constraint RETETE_COD_RETETA_PK primary key (COD_RETETA);
+alter table RETETE_PROIECT
+  add constraint RETETE_ID_CLIENT_FK foreign key (ID_CLIENTI)
+  references CLIENTI_PROIECT (ID_CLIENT) on delete set null;
+alter table RETETE_PROIECT
+  add constraint RETETE_DATA_ELIBERARII_NN
+  check ("DATA_ELIBERARII" IS NOT NULL);
+alter table RETETE_PROIECT
+   add constraint RETETE_NUME_EMITENT_NN
+   check ("NUME_EMITENT" IS NOT NULL);
+
+create table MEDICAMENTE_PROIECT
+(
+ COD_MEDICAMENT           NUMBER(8) not null CONSTRAINT medicamente_cod_medicament_pk PRIMARY KEY,
+ pret                     NUMBER(8,2),
+ stoc                     NUMBER(5),
+ natura_excipientului     VARCHAR(30) NOT NULL,
+ producator               VARCHAR(40) NOT NULL,
+ denumire_medicament      VARCHAR(40) NOT NULL
+);
+
+create table DETALII_RETETE_PROIECT
+(
+ COD_MEDICAMENT NUMBER(8) constraint DETALII_RETETE_FK references MEDICAMENTE_PROIECT(COD_MEDICAMENT),
+ dozaj          NUMBER,
+ ID_RETETA      NUMBER(12),
+constraint RETETA_PROIECT_FK foreign key (ID_RETETA) references RETETE_PROIECT(COD_RETETA),
+constraint DETALII_RETETA_PK primary key (COD_MEDICAMENT, ID_RETETA)
+);
+
+create table VANZARI_PROIECT
+(
+ COD_VANZARE       NUMBER(8) constraint VANZARI_PROIECT_PK primary key,
+ cantitate         NUMBER(3) not null,
+ ID_CLIENT         NUMBER(6),
+ COD_RETETA        NUMBER(12),
+ COD_MEDICAMENT    NUMBER(8),
+constraint FK_COD_RETETA foreign key (COD_RETETA) references RETETE_PROIECT(COD_RETETA),
+constraint FK_ID_CLIENT foreign key (ID_CLIENT) references CLIENTI_PROIECT(ID_CLIENT),
+constraint FK_COD_MEDICAMENT foreign key(COD_MEDICAMENT) references MEDICAMENTE_PROIECT(COD_MEDICAMENT)
+);
+
+
+create table ANGAJATI_PROIECT
+(
+  ID_ANGAJATI           NUMBER(6) not null,
+  prenume_angajat       VARCHAR2(20) not null,
+  nume_angajat          VARCHAR2(25) not null,
+  email_angajat         VARCHAR2(25),
+  telefon_angajat       VARCHAR2(20),
+  data_angajare         DATE,
+  salariul_angajat      NUMBER(8,2),
+  comision              NUMBER(2,2)
+);
+alter table ANGAJATI_PROIECT
+  add constraint ANG_ID_ANGAJATI_PK primary key (ID_ANGAJATI);
+alter table ANGAJATI_PROIECT
+  add constraint ANG_EMAIL_UKKK unique (EMAIL_ANGAJAT);
+
+create table BONURI_PROIECT
+(
+ NR_BONURI          NUMBER(8) constraint BONURI_PROIECT_PK primary key,
+ data_vanzare    DATE,    
+ COD_VANZARE     NUMBER(8) constraint FK_COD_VANZARE references VANZARI_PROIECT(COD_VANZARE),
+ ID_ANGAJATI     NUMBER(6) constraint ID_ANGAJATI references ANGAJATI_PROIECT(ID_ANGAJATI)
+);
+
+
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(1, 'Ana', 'Ionescu', '0723668902', 'Ana.Ionescu@gmail.com', to_date('18-07-1995', 'dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT, prenume_client ,nume_client,telefon_client,email_client,data_nastere,sex)
+values(2, 'Ioana', 'Popescu', '0721568445', 'Ioana.Popescu@yahoo.com', to_date('16-04-2000', 'dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(3, 'Andrei', 'Giurcanu', '0734568790' , 'Andrei.Giurcanu@gmail.com', to_date('12-03-1992', 'dd-mm-yyyy'), 'M');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(4, 'Miruna', 'Dobre', '0724899567', 'Miruna.Dobre@gmail.com', to_date('12-07-1998', 'dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(5, 'Gabriela', 'Preda', '0735996124', 'Gabriela.Preda@gmail.com', to_date('04-05-2001', 'dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(6, 'Ionut', 'Serban', '0724789452', 'Ionut.Serban@yahoo.com', to_date('16-08-1994', 'dd-mm-yyyy'), 'M');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(7, 'Marius', 'Vasile', '0712345678', 'Marius.Vasile@yahoo.com', to_date('12-02-1991', 'dd-mm-yyyy'), 'M');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(8, 'Maria', 'Dragun', '0721896672', 'Maria.Dragun@gmail.com', to_date('01.10.2000', 'dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(9, 'Marina', 'Paduraru', '0724986267', 'Marina.Paduraru@yahoo.com', to_date('07.05.1995', 'dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(10, 'Andrei', 'Dumitrescu', '0789357634', 'Andrei.Dumitrescu@gmail.com', to_date('09-04-1998', 'dd-mm-yyyy'), 'M');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(11, 'Victor', 'Marinescu' , '0721685678', 'Victor.Marinescu@gmail.com', to_date('12-09-2000', 'dd-mm-yyyy'), 'M');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(12, 'Bogdan' , 'Popescu', '0737496975', 'Bogdan.Popescu@yahoo.com', to_date('13-06-1998', 'dd-mm-yyyy'), 'M');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(13, 'Alexandra' , 'Dinu', '0721569742', 'Alexandra.Dinu@yahoo.com', to_date('14-09-1993', 'dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(14, 'Andrada', 'Costache','0737895667', 'Andrada.Costache@gmail.com', to_date('16-11-1998', 'dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(15, 'Bogdan', 'Calin', '0726793346', 'BogdanCalin@yahoo.com', to_date('12-12-1992', 'dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(16, 'Eliza', 'Popescu', '0734678232', 'Eliza.Popescu@yahoo.com', to_date('15-09-2001', 'dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(17, 'Sara' , 'Buricatu', '0725678954', 'Sara.Buricatu@gmail.com', to_date('16-08-1995', 'dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(18, 'Marius', 'Budulea', '0754836821', 'Marius.Budulea@yahoo.com', to_date('09-07-1986', 'dd-mm-yyyy'), 'M');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(19, 'Daniela', 'Eminescu', '0715683657', 'Daniela.Eminescu@yahoo.com', to_date('19-04-1978', 'dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(20, 'Ioana', 'Barbu', '0756223779', 'Ioana.Barbu@gmail.com', to_date('15-07-1975', 'dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(21, 'Julieta', 'Capulet', '0734342331', 'Julieta.Capulet@gmail.com', to_date('19-04-2001','dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(22, 'Catalin' , 'Dumitrescu' , '0732784453', 'Catalin.Dumitrescu@gmail.com', to_date('13-01-1986', 'dd-mm-yyyy'), 'M');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(23, 'Robert', 'Florea', '0729670267', 'Robert.Florea@gmail.com', to_date('17-12-1889', 'dd-mm-yyyy'), 'M');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(24, 'Cristina' , 'Tache', '0725767827', 'Cristina.Tache@gmail.com', to_date('12-09-1998', 'dd-mm-yyyy'), 'F');
+insert into CLIENTI_PROIECT (ID_CLIENT,prenume_client,nume_client,telefon_client,email_client,data_nastere,sex)
+values(25, 'Victor', 'Manescu', '0745275678', 'Victor.Manescu@yahoo.com', to_date('14-06-2002', 'dd-mm-yyyy'), 'M');
+
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(1, to_date('12-01-2019', 'dd-mm-yyyy'), 'compensata', 'raceala', 'Clinica Sperantei', 'Vasile Ionut', 1);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(2, to_date('13-01-2019', 'dd-mm-yyyy'), 'compensata', 'migrena', 'Spitalul Clnic Coltea','Raluca Badescu', 2);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(3, to_date('11-02-2019','dd-mm-yyyy'), 'gratuita', 'gripa','Spitalul Soarelui', 'Marisa Paloma', 3);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(4, to_date('15-02-2019','dd-mm-yyyy'), 'compensata', 'diabet', 'Spitalul Clinic de Urgenta', 'Catrina Potecaru', 4);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(5, to_date('15-02-2019', 'dd-mm-yyyy'), 'compensata', 'rujeola', 'Spitalul judetean', 'Teodora Tecuceanu', 5);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(6, to_date('19-02-2019', 'dd-mm-yyyy'), 'compensata', 'pneumonie', 'Spitalul militar', 'Rares Constantinescu', 6);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(7, to_date('14-03-2019', 'dd-mm-yyyy'), 'compensata', 'viroza', 'Clinica MedLife', 'Bianca Ionescu', 7);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(8, to_date('11-04-2019','dd-mm-yyyy'), 'necompensata', 'bronsita', 'Spitalul Clinic Sfanta Maria', 'Cristian Manescu', 8);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(9, to_date('13-04-2019', 'dd-mm-yyyy'), 'necompensata', 'evisceratia', 'Spitalul Floreasca', 'Antonescu Nicolae', 9);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(10, to_date('12-05-2019', 'dd-mm-yyyy'), 'necompensata', 'dureri abdominale', 'Clinica Centrala', 'Dana Buricatu',10);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(11, to_date('18-05-2019', 'dd-mm-yyyy'), 'compensata', 'difteria', 'Spitalul nr12', 'Daniela Trica', 11);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(12, to_date('13-06-2019', 'dd-mm-yyyy'), 'necompensata', 'astm','Clinica de urgenta', 'Catalina Iosifescu', 12);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(13, to_date('12-07-2019', 'dd-mm-yyyy'), 'gratuita', 'malarie', 'Clinica lovelife', 'Valeriu Rotariu', 13);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(14, to_date('26-07-2019', 'dd-mm-yyyy'), 'compensata', 'alergie', 'Spitalul nr 8', 'Victor Zaharia', 14);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(15, to_date('11-08-2019', 'dd-mm-yyyy'), 'gratuita', 'duodenita', 'Clinica La Luna', 'Victoria Banescu', 15);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(16,to_date('02-09-2019','dd-mm-yyyy'), 'gratuita', 'alergie', 'Med Studio', 'Raluca Radateanu', 16);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(17, to_date('18-01-2020', 'dd-mm-yyyy'), 'gratuita' , 'conjunctivita', 'Spitalul judetean Luna', 'Mauricce Paunescu', 17);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(18, to_date('18-01-2020', 'dd-mm-yyyy'), 'necompensata', 'ulcer', 'Spitalul Clinic Rose', 'Alexandra Manea', 18);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(19, to_date('15-02-2020', 'dd-mm-yyyy'), 'gratuita', 'gastrita', 'Spitalul Florea', 'Catalin Radulescu', 19);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(20, to_date('20-02-2020', 'dd-mm-yyyy'), 'necompensata', 'diabet', 'Spitalul Florea', 'Oana Radulescu', 20);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(21, to_date('13-03-2020', 'dd-mm-yyyy'), 'gratuita', 'gastrita', 'Spitalul Florea', 'Catalin Valeriu', 21);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(22, to_date('24-03-2020', 'dd-mm-yyyy'), 'gratuita', 'gripa', 'Med Lab', 'Bianca Ionescu', 22);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(23, to_date('23-04-2020', 'dd-mm-yyyy'), 'compensata', 'varicela', 'Medic Studio', 'Andreea Radu', 23);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(24, to_date('27-04-2020', 'dd-mm-yyyy'), 'compensata', 'varicela', 'Medic Studio', 'Lorena Serban', 24);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(25, to_date('23-05-2020', 'dd-mm-yyyy'), 'compensata', 'dermatita seboreica', 'Medic Studio', 'Andreea Radu', 25);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(26, to_date('12-06-2020', 'dd-mm-yyyy'), 'gratuita', 'diabet', 'Medic Studio', 'Vlad Voiculescu', 6);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(27, to_date('12-07-2020', 'dd-mm-yyyy'), 'compensata', 'ulcer', 'Medic Studio', 'Ion Anghel', 8);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(28, to_date('12-08-2020', 'dd-mm-yyyy'), 'gratuita', 'varicela', 'Clinica Vitalis', 'Maria Sandu', 9);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(30, to_date('14-09-2020', 'dd-mm-yyyy'), 'compensata', 'arsuri', 'Medic Studio', 'Ionut Voiculescu', 20);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(29, to_date('12-09-2020', 'dd-mm-yyyy'), 'compensata', 'raceala', 'Clinica Sperantei', 'Vasile Voicu', 1);
+
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(1, 4.5, 210, 'Comprimate', 'ARENA GROUP', 'Rantidina');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(2, 10.11, 40, 'Siropuri','Terapeutic', 'Lactulose');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(3, 20.66, 120, 'Pastile', 'Ozone', 'Ibuprofen');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(4, 20.77, 110, 'Comprimate','Biofarm', 'Nurofen');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(5, 30.06, 55, 'Unguente', 'Bezen', 'FastumGel');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(6, 11, 70, 'Gel', 'Bayer', 'Oculoter');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(7, 30.55, 140,  'Comprimate', 'Biofarm', 'Spirulina'); 
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(7, 25.55, 140, 'Gel', 'Gedeon', 'BioOil');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(8, 12.99, 100, 'Capsule', 'Antibiotice SA', 'Amoxicilina');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(9, 18.99, 36, 'Comprimate', 'Sintifarm', 'Aspirina');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(10, 18.66, 140, 'Comprimate', 'Biofarm', 'Algozone');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(11, 29.00, 70, 'Capsule' , 'Biofarm', 'Biosept');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(12, 35.61, 120, 'Capsule', 'Farmacia Tei', 'VitaMax');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(13, 23.22, 90, 'Pastile', 'Biofarm', 'Theraflu');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(14, 30.88, 100, 'Sirop' , 'TetraFarm', 'Panadol Baby');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(15, 25.99, 30, 'Sirop', 'TetraFarm' , 'Bioflu');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(16, 24.99, 120, 'Unguente', 'Solarfarm', 'Baneocin');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(17, 34.56, 68, 'Unguente', 'Solarfarm', 'Betadine');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(18, 45.99, 90, 'Unguente', 'Solarfarm', 'Neopreol');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(19, 45, 120, 'Comprimate', 'Solarfarm', 'Antinevralgic');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(20, 66, 100, 'Comprimate', 'Solarfarm', 'Panadol');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(21, 35, 120, 'Comprimate', 'Bebe Tei', 'Gaviscon');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(22, 34.99, 70, 'Comprimate', 'Bebe Tei', 'Gastrocalmin');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(23, 19.55, 90, 'Comprimate', 'Bebe Tei', 'Nedis');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(24, 34, 40, 'Pastile', 'Solary', 'SystemWell');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(25, 19.88, 70, 'Pastile', 'Solary', 'VitaPropolis');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(26, 25, 200, 'Suplimente', 'Dr.Hart', 'Detrical');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(27, 36.99, 85, 'Suplimente', 'Dr.Hart', 'Imunotin');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(28, 74.40, 90, 'Sirop', 'Dr.Hart', 'ColdTusin');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(29, 34.77, 140, 'Sirop', 'Dr.Hart', 'Bronhoklir');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(30, 12.99, 120, 'Comprimate', 'Dr.Hart', 'Imunotos');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(31, 20.99, 150, 'Comprimate', 'Sanofi', 'Algocalmin');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(32, 10.99, 20, 'Comprimate', 'Dr.Hart', 'Aspenter');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(33, 35.99, 60, 'Comprimate', 'Dr.Hart', 'Parasinus');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(34, 20.99, 100, 'Comprimate', 'MSD', 'Paracetamol');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(34, 25.99, 200, 'Comprimate', 'Abbott', 'Antinevralgic P');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(35, 40 , 55, 'Comprimate', 'Roche', 'Enap');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(36, 16.55 , 112, 'Comprimate', 'Servier', 'Amoxicilina');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(37, 16.78, 70, 'Comprimate', 'AstraZeneca', 'Tertensif');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(38, 12.99, 125, 'Capsule', 'Novartis', 'Ampicilina');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(39, 12.99, 120, 'Gel', 'Hofigal', 'Skinoren');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(40, 13.00 , 125, 'Capsule', 'Servier', 'Afin');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(41, 13.00, 170, 'Capsule', 'AstraZeneca', 'Anghirol');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(42, 17.99, 40, 'Capsule', 'Transvital', 'Astragalus');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(43, 19.99, 110, 'Capsule', 'Pharmnet', 'Biomicin');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(44, 16.55 , 90, 'Comprimate', 'Servier', 'StressHelp');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(45, 16.78, 65, 'Capsule', 'Pharmnet', 'Griffonia');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(46, 30.00, 85, 'Capsule', 'Pharmnet', 'Reviva');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(47, 39.99, 90, 'Gel', 'Polisano', 'Cerebinox');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(48, 18.55 , 130, 'Capsule', 'Cosmopharm', 'Cardiotonic');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(49, 19.99, 170, 'Comprimate', 'AstraZeneca', 'Aspirin Cardio');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(50, 20.99, 35, 'Crema', 'Bayer', 'Bepanthen');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(51, 17.85 , 100, 'Gel', 'Biotrade', 'Maskrym');
+
+
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(1, 1, 1);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(2, 1, 2);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(3, 2, 3);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(4, 2, 4);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(5, 3, 5);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(6, 3, 6);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(7, 4, 7);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(8, 4, 8);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(9, 5, 9);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(10, 5, 10);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(11, 1, 11);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(12, 2, 12);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(13, 2, 13);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(14, 2, 14);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(15, 3, 15);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(16, 3, 16);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(17, 4, 17);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(18, 4, 18);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(19, 5, 19);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(20, 5, 20);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(21, 1, 21);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(22, 1, 22);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(23, 2, 23);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(24, 2, 24);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(25, 3, 25);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(26, 3, 26);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(27, 4, 27);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(28, 4, 28);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(29, 5, 29);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(30, 1, 30);
+
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(0, 1, 1, 1, 1);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(1, 1, 2, 2, 2);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(2, 2, 3, 3, 3);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(3, 2, 4, 4, 4);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(4, 3, 5, 5, 5);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(5, 3, 6, 6, 6);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(6, 4, 7, 7, 7);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(7, 4, 8, 8, 8);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(8, 5,9, 9 ,9);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(9, 5 , 10, 10 ,10);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(10, 1 , 11, 11, 11);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(11, 1, 12, 12, 12);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(12, 2 ,13 ,13 ,13);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(13, 2 , 14, 14, 14);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(14, 3 ,15, 15, 15);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(15, 3 ,16, 16, 16);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(16, 4 ,17 , 17, 17);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(17, 4 ,18 , 18, 18);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(18, 5 ,19, 19, 19);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(19, 5 , 20 , 20, 20);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(20, 1 , 21 ,21, 21);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(21,  1, 22 , 22, 22);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(22, 2 , 23, 23, 23);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(23, 2 , 24, 24, 24);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(24, 3 , 25, 25, 25);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(25, 3 , 7, 26, 26);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(26, 4 , 8, 27, 27);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(27, 4 , 9, 28, 28);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(28, 5 , 10, 29, 29);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(29, 1 , 20, 30, 30);
+
+insert into ANGAJATI_PROIECT(id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(1, 'Ioana', 'Moise', 'Ioana.Moise@yahoo.com', '0732553289', to_date('11-10-2019','dd-mm-yyyy'), 250, 0.3);
+insert into ANGAJATI_PROIECT(id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(2, 'Maria', 'Manu', 'Maria.Manu@yahoo.com', '0732553239', to_date('12-12-2019','dd-mm-yyyy'), 250, 0.3);
+insert into ANGAJATI_PROIECT(id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(3, 'Monica', 'Tache', 'Monica.Tache@yahoo.com', '0732553200', to_date('10-02-2019','dd-mm-yyyy'), 250, 0.3);
+insert into ANGAJATI_PROIECT(id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(4, 'Sofia', 'Olaru', 'Sofia.Olaru@yahoo.com', '0732443239', to_date('19-08-2019','dd-mm-yyyy'), 200, 0.4);
+
+
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(1,to_date('12-01-2019', 'dd-mm-yyyy'), 0, 1);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(2,to_date('13-01-2019', 'dd-mm-yyyy'), 1, 2);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(3,to_date('11-02-2019', 'dd-mm-yyyy'), 2, 3);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(4,to_date('15-02-2019', 'dd-mm-yyyy'), 3, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(5,to_date('15-02-2019', 'dd-mm-yyyy'), 4, 1);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(6,to_date('19-02-2020', 'dd-mm-yyyy'), 5, 2);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(7,to_date('14-03-2020', 'dd-mm-yyyy'), 6, 5);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(8,to_date('11-04-2019', 'dd-mm-yyyy'), 7, 3);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(9,to_date('13-04-2020', 'dd-mm-yyyy'), 8, 2);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(10,to_date('12-05-2020', 'dd-mm-yyyy'), 9, 1);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(11,to_date('18-05-2020', 'dd-mm-yyyy'), 10, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(12,to_date('13-06-2020', 'dd-mm-yyyy'), 11, 3);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(13,to_date('12-07-2019', 'dd-mm-yyyy'), 12, 3);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(14,to_date('26-07-2020', 'dd-mm-yyyy'), 13, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(15,to_date('11-08-2019', 'dd-mm-yyyy'), 14, 1);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(16,to_date('02-09-2019', 'dd-mm-yyyy'), 15, 1);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(17,to_date('17-01-2020', 'dd-mm-yyyy'), 16, 1);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(18,to_date('18-01-2020', 'dd-mm-yyyy'), 17, 2);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(19,to_date('15-02-2020', 'dd-mm-yyyy'), 18, 2);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(20,to_date('20-02-2020', 'dd-mm-yyyy'), 19, 1);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(21,to_date('13-03-2019', 'dd-mm-yyyy'), 20, 2);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(22,to_date('24-03-2019', 'dd-mm-yyyy'), 21, 3);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(23,to_date('23-04-2019', 'dd-mm-yyyy'), 22, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(24,to_date('27-04-2020', 'dd-mm-yyyy'), 23, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(25,to_date('23-05-2020', 'dd-mm-yyyy'), 24, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(26,to_date('12-06-2020', 'dd-mm-yyyy'), 25, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(27,to_date('12-07-2020', 'dd-mm-yyyy'), 26, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(28,to_date('12-08-2020', 'dd-mm-yyyy'), 27, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(29,to_date('12-09-2020', 'dd-mm-yyyy'), 28, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(30,to_date('14-09-2020', 'dd-mm-yyyy'), 29, 2);
+
+
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(1, to_date('12-01-2019', 'dd-mm-yyyy', 'compensata', 'raceala', 'Clinica Sperantei', 'Vasile Ionut', 1);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(2, to_date('13-01-2019', 'dd-mm-yyyy'), 'compensata', 'migrena', 'Spitalul Clnic Coltea','Raluca Badescu', 2);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(3, to_date('11-02-2019','dd-mm-yyyy'), 'gratuita', 'gripa','Spitalul Soarelui', 'Marisa Paloma', 3);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(4, to_date('15-02-2019','dd-mm-yyyy'), 'compensata', 'diabet', 'Spitalul Clinic de Urgenta', 'Catrina Potecaru', 4);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(5, to_date('15-02-2019', 'dd-mm-yyyy'), 'compensata', 'rujeola', 'Spitalul judetean', 'Teodora Tecuceanu', 5);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(6, to_date('19-02-2019', 'dd-mm-yyyy'), 'compensata', 'pneumonie', 'Spitalul militar', 'Rares Constantinescu', 6);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(7, to_date('14-03-2019', 'dd-mm-yyyy'), 'compensata', 'viroza repriratorie', 'Clinica MedLife', 'Bianca Adam', 7);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(8, to_date('11-04-2019','dd-mm-yyyy'), 'necompensata', 'bronsita', 'Spitalul Clinic Sfanta Maria', 'Cristian Manescu', 8);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(9, to_date('13-04-2019', 'dd-mm-yyyy'), 'necompensata', 'evisceratia', 'Spitalul Floreasca', 'Antonescu Nicolae', 9);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(10, to_date('12-05-2019', 'dd-mm-yyyy'), 'necompensata', 'dureri abdominale', 'Clinica Centrala', 'Dana Buricatu',10);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(11, to_date('18-05-2019', 'dd-mm-yyyy'), 'compensata', 'difteria', 'Spitalul nr12', 'Daniela Trica', 11);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(12, to_date('13-06-2019', 'dd-mm-yyyy'), 'necompensata', 'astm','Clinica de urgenta', 'Catalina Iosifescu', 12);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(13, to_date('12-07-2019', 'dd-mm-yyyy'), 'gratuita', 'malarie', 'Clinica lovelife', 'Valeriu Rotariu', 13);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(14, to_date('26-07-2019', 'dd-mm-yyyy'), 'compensata', 'alergie', 'Spitalul nr 8', 'Victor Zaharia', 14);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(15, to_date('11-08-2019', 'dd-mm-yyyy'), 'gratuita', 'duodenita', 'Clinica La Luna', 'Victoria Banescu', 15);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(16,to_date('02-09-2019','dd-mm-yyyy'), 'gratuita', 'alergie', 'Med Studio', 'Raluca Radateanu', 16);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(17, to_date('17-01-2020', 'dd-mm-yyyy'), 'gratuita' , 'conjunctivita', 'Spitalul judetean Luna', 'Mauricce Paunescu', 17);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(18, to_date('18-01-2020', 'dd-mm-yyyy'), 'necompensata', 'ulcer', 'Spitalul Clinic Rose', 'Alexandra Manea', 18);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(19, to_date('15-02-2020', 'dd-mm-yyyy'), 'gratuita', 'gastrita', 'Spitalul Florea', 'Catalin Radulescu', 19);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(20, to_date('20-02-2020', 'dd-mm-yyyy'), 'necompensata', 'intoxicatie alimentara', 'Spitalul central', 'Monica Andronescu', 20);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(21, to_date('13-03-2020', 'dd-mm-yyyy'), 'necompensata', 'diabet', 'Clinica nr7' , 'Oana Raducanu', 21);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(22, to_date('24-03-2020', 'dd-mm-yyyy'), 'gratuita', 'gripa', 'Med Lab', 'Bianca Ionescu', 22);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(23, to_date('23-04-2020', 'dd-mm-yyyy'), 'compensata', 'varicela', 'Medic Studio', 'Andreea Radu', 23);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(24, to_date('27-04-2020', 'dd-mm-yyyy'), 'compensata', 'varicela', 'Medic Studio', 'Lorena Serban', 24);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(25, to_date('23-05-2020', 'dd-mm-yyyy'), 'compensata', 'dermatita seboreica', 'Medic Studio', 'Andreea Radu', 25);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(26, to_date('12-06-2020', 'dd-mm-yyyy'), 'gratuita', 'diabet', 'Medic Studio', 'Vlad Voiculescu', 7);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(27, to_date('12-07-2020', 'dd-mm-yyyy'), 'compensata', 'ulcer', 'Medic Studio', 'Ion Anghel', 8);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(28, to_date('12-08-2020', 'dd-mm-yyyy'), 'gratuita', 'varicela', 'Clinica Vitalis', 'Maria Sandu', 9);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(29, to_date('12-09-2020', 'dd-mm-yyyy'), 'compensata', 'intoxicatie alimentara', 'Medic Studio', 'Vlad Voiculescu', 10);
+insert into RETETE_PROIECT(cod_reteta, data_eliberarii,tip_reteta,diagnostic,emitent,nume_emitent,id_client)
+values(30, to_date('14-09-2020', 'dd-mm-yyyy'), 'compensata', 'arsuri', 'Medic Studio', 'Ionut Voiculescu', 20);
+
+
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(1, 4.5, 210, 'Comprimate', 'ARENA GROUP', 'Rantidina');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(2, 10.11, 40, 'Siropuri','Terapeutic', 'Lactulose');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(3, 20.66, 120, 'Pastile', 'Ozone', 'Ibuprofen');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(4, 20.77, 110, 'Comprimate','Biofarm', 'Nurofen');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(5, 30.06, 55, 'Unguente', 'Bezen', 'FastumGel');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(6, 11, 70, 'Gel', 'Bayer', 'Oculoter');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(7, 30.55, 140,  'Comprimate', 'Biofarm', 'Spirulina'); 
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(7, 25.55, 140, 'Gel', 'Gedeon', 'BioOil');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(8, 12.99, 100, 'Capsule', 'Antibiotice SA', 'Amoxicilina');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(9, 18.99, 36, 'Comprimate', 'Sintifarm', 'Aspirina');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(10, 18.66, 140, 'Comprimate', 'Biofarm', 'Algozone');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(11, 29.00, 70, 'Capsule' , 'Biofarm', 'Biosept');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(12, 35.61, 120, 'Capsule', 'Farmacia Tei', 'VitaMax');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(13, 23.22, 90, 'Pastile', 'Biofarm', 'Theraflu');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(14, 30.88, 100, 'Sirop' , 'TetraFarm', 'Panadol Baby');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(15, 25.99, 30, 'Sirop', 'TetraFarm' , 'Bioflu');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(16, 24.99, 120, 'Unguente', 'Solarfarm', 'Baneocin');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(17, 34.56, 68, 'Unguente', 'Solarfarm', 'Betadine');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(18, 45.99, 90, 'Unguente', 'Solarfarm', 'Neopreol');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(19, 45, 120, 'Comprimate', 'Solarfarm', 'Antinevralgic');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(20, 66, 100, 'Comprimate', 'Solarfarm', 'Panadol');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(21, 35, 120, 'Comprimate', 'Bebe Tei', 'Gaviscon');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(22, 34.99, 70, 'Comprimate', 'Bebe Tei', 'Gastrocalmin');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(23, 19.55, 90, 'Comprimate', 'Bebe Tei', 'Nedis');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(24, 34, 40, 'Pastile', 'Solary', 'SystemWell');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(25, 19.88, 70, 'Pastile', 'Solary', 'VitaPropolis');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(26, 25, 200, 'Suplimente', 'Dr.Hart', 'Detrical');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(27, 36.99, 85, 'Suplimente', 'Dr.Hart', 'Imunotin');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(28, 74.40, 90, 'Sirop', 'Dr.Hart', 'ColdTusin');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(29, 34.77, 140, 'Sirop', 'Dr.Hart', 'Bronhoklir');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(30, 12.99, 120, 'Comprimate', 'Dr.Hart', 'Imunotos');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(31, 20.99, 150, 'Comprimate', 'Sanofi', 'Algocalmin');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(32, 10.99, 20, 'Comprimate', 'Dr.Hart', 'Aspenter');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(33, 35.99, 60, 'Comprimate', 'Dr.Hart', 'Parasinus');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(34, 20.99, 100, 'Comprimate', 'MSD', 'Paracetamol');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(34, 25.99, 200, 'Comprimate', 'Abbott', 'Antinevralgic P');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(35, 40 , 55, 'Comprimate', 'Roche', 'Enap');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(36, 16.55 , 112, 'Comprimate', 'Servier', 'Amoxicilina');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(37, 16.78, 70, 'Comprimate', 'AstraZeneca', 'Tertensif');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(38, 12.99, 125, 'Capsule', 'Novartis', 'Ampicilina');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(39, 12.99, 120, 'Gel', 'Hofigal', 'Skinoren');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(40, 13.00 , 125, 'Capsule', 'Servier', 'Afin');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(41, 13.00, 170, 'Capsule', 'AstraZeneca', 'Anghirol');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(42, 17.99, 40, 'Capsule', 'Transvital', 'Astragalus');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(43, 19.99, 110, 'Capsule', 'Pharmnet', 'Biomicin');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(44, 16.55 , 90, 'Comprimate', 'Servier', 'StressHelp');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(45, 16.78, 65, 'Capsule', 'Pharmnet', 'Griffonia');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(46, 30.00, 85, 'Capsule', 'Pharmnet', 'Reviva');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(47, 39.99, 90, 'Gel', 'Polisano', 'Cerebinox');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(48, 18.55 , 130, 'Capsule', 'Cosmopharm', 'Cardiotonic');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(49, 19.99, 170, 'Comprimate', 'AstraZeneca', 'Aspirin Cardio');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(50, 20.99, 35, 'Crema', 'Bayer', 'Bepanthen');
+insert into MEDICAMENTE_PROIECT(cod_medicament, pret, stoc, natura_excipientului,producator, denumire_medicament)
+values(51, 17.85 , 100, 'Gel', 'Biotrade', 'Maskrym');
+
+
+
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(1, 1, 1);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(2, 1, 2);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(3, 2, 3);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(4, 2, 4);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(5, 3, 5);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(6, 3, 6);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(7, 4, 7);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(8, 4, 8;
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(9, 5, 9);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(10, 5, 10);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(11, 1, 11);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(12, 2, 12);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(13, 2, 13);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(14, 2, 14);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(15, 3, 15);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(16, 3, 16);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(17, 4, 17);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(18, 4, 18);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(19, 5, 19);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(20, 5, 20);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(21, 1, 21);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(22, 1, 22);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(23, 2, 23);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(24, 2, 24);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(25, 3, 25);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(26, 3, 26);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(27, 4, 27);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(28, 4, 28);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(29, 5, 29);
+insert into DETALII_RETETE_PROIECT(cod_medicament, dozaj, id_reteta)
+values(30, 1, 30);
+
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(0, 1, 1, 1, 1);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(1, 1, 2, 2, 2);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(2, 2, 3, 3, 3);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(3, 2, 4, 4, 4);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(4, 3, 5, 5, 5);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(5, 3, 6, 6, 6);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(6, 4, 7, 7, 7);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(7, 4, 8, 8, 8);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(8, 5,9, 9 ,9);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(9, 5 , 10, 10 ,10);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(10, 1 , 11, 11, 11);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(11, 1, 12, 12, 12);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(12, 2 ,13 ,13 ,13);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(13, 2 , 14, 14, 14);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(14, 3 ,15, 15, 15);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(15, 3 ,16, 16, 16);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(16, 4 ,17 , 17, 17);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(17, 4 ,18 , 18, 18);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(18, 5 ,19, 19, 19);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(19, 5 , 20 , 20, 20);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(20, 1 , 21 ,21, 21);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(21,  1, 22 , 22, 22);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(22, 2 , 23, 23, 23);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(23, 2 , 24, 24, 24);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(24, 3 , 25, 25, 25);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(25, 3 , 7, 26, 26);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(26, 4 , 8, 27, 27);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(27, 4 , 9, 28, 28);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(28, 5 , 10, 29, 29);
+insert into VANZARI_PROIECT(cod_vanzare, cantitate, id_client, cod_reteta, cod_medicament)
+values(29, 1 , 20, 30, 30);
+
+
+insert into ANGAJATI_PROIECT(id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(1, 'Andrei', 'Marinescu', 'Andrei.Marinescu@gmail.com', '0723473256', to_date('12-09-2020','dd-mm-yyyy'), 200, 0.2);
+insert into ANGAJATI_PROIECT(id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(2, 'Maria', 'Manu', 'Maria.Manu@yahoo.com', '0732553239', to_date('12-12-2019','dd-mm-yyyy'), 250, 0.3);
+insert into ANGAJATI_PROIECT(id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(3, 'Lavinia', 'Soare', 'Lavinia.Soare@gmail.com', to_date('14-09-2019','dd-mm-yyyy'),200, 0.1);
+insert into ANGAJATI_PROIECT(id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(4, 'Alexandra', 'Zaharia', 'Alexandra.Zaharia@gmail.com', to_date('09-04-2020','dd-mm-yyyy'), 250, 0.2);
+
+
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(1,to_date('12-01-2019', 'dd-mm-yyyy'), 0, 1);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(2,to_date('13-01-2019', 'dd-mm-yyyy'), 1, 2);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(3,to_date('11-02-2019', 'dd-mm-yyyy'), 2, 3);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(4,to_date('15-02-2019', 'dd-mm-yyyy'), 3, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(5,to_date('15-02-2019', 'dd-mm-yyyy'), 4, 1);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(6,to_date('19-02-2020', 'dd-mm-yyyy'), 5, 2);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(7,to_date('14-03-2020', 'dd-mm-yyyy'), 6, 2);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(8,to_date('11-04-2019', 'dd-mm-yyyy'), 7, 3);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(9,to_date('13-04-2020', 'dd-mm-yyyy'), 8, 2);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(10,to_date('12-05-2020', 'dd-mm-yyyy'), 9, 1);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(11,to_date('18-05-2020', 'dd-mm-yyyy'), 10, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(12,to_date('13-06-2020', 'dd-mm-yyyy'), 11, 3);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(13,to_date('12-07-2019', 'dd-mm-yyyy'), 12, 3);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(14,to_date('26-07-2020', 'dd-mm-yyyy'), 13, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(15,to_date('11-08-2019', 'dd-mm-yyyy'), 14, 1);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(16,to_date('02-09-2019', 'dd-mm-yyyy'), 15, 1);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(17,to_date('17-01-2020', 'dd-mm-yyyy'), 16, 1);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(18,to_date('18-01-2020', 'dd-mm-yyyy'), 17, 2);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(19,to_date('15-02-2020', 'dd-mm-yyyy'), 18, 2);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(20,to_date('20-02-2020', 'dd-mm-yyyy'), 19, 1);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(21,to_date('13-03-2019', 'dd-mm-yyyy'), 20, 2);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(22,to_date('24-03-2019', 'dd-mm-yyyy'), 21, 3);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(23,to_date('23-04-2019', 'dd-mm-yyyy'), 22, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(24,to_date('27-04-2020', 'dd-mm-yyyy'), 23, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(25,to_date('23-05-2020', 'dd-mm-yyyy'), 24, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(26,to_date('12-06-2020', 'dd-mm-yyyy'), 25, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(27,to_date('12-07-2020', 'dd-mm-yyyy'), 26, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(28,to_date('12-08-2020', 'dd-mm-yyyy'), 27, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(29,to_date('12-09-2020', 'dd-mm-yyyy'), 28, 4);
+insert into BONURI_PROIECT(nr_bon,data_vanzare,cod_vanzare,id_angajati)
+values(30,to_date('14-09-2020', 'dd-mm-yyyy'), 29, 2);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(1, 5, 'Bianca', 'Cornelia', 'Bianca.Cornelia@yahoo.com', '0732113289', to_date('11-10-2019','dd-mm-yyyy'), 200, 0.3);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(2, 6, 'Catrina', 'Nastase', 'Catrina.Nastase@yahoo.com', '0734348980', to_date('15-05-2020','dd-mm-yyyy'), 300, 0.2);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(2, 7, 'Ionut', 'Almajanu', 'Ionut.Almajanu@yahoo.com', '0723689076', to_date('19-02-2020','dd-mm-yyyy'), 210, 0.4);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(3, 8, 'Catalin', 'Zaharia', 'Catalin.Zaharia@yahoo.com', '0721878045', to_date('22-07-2020','dd-mm-yyyy'), 280, 0.3);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(2, 9, 'Elena', 'Dragan', 'Elena.Dragan@yahoo.com', '0732113908', to_date('21-05-2020','dd-mm-yyyy'), 200, 0.3);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(4, 10, 'Lavinia', 'Radu', 'Lavinia.Radu@yahoo.com', '0734679022', to_date('17-09-2019','dd-mm-yyyy'), 250, 0.3);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(5, 11, 'Mihaela', 'Calin', 'Mihaela.Calin@yahoo.com', '0738903244', to_date('01-10-2020','dd-mm-yyyy'), 300, 0.2);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(6, 12, 'Maria', 'Cojocaru', 'Maria.Cojocaru@yahoo.com', '0789244378', to_date('04-09-2020','dd-mm-yyyy'), 250, 0.5);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(6, 13, 'Mihai', 'Stoica', 'Mihai.Stoica@yahoo.com', '0756863902', to_date('13-08-2020','dd-mm-yyyy'), 250, 0.3);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(6, 14, 'Cristina', 'Toma', 'Cristina.Toma@yahoo.com', '0745678902', to_date('11-08-2019','dd-mm-yyyy'), 250, 0.2);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(10, 15, 'Alina', 'Florea', 'Alina.Florea@yahoo.com', '0790675343', to_date('16-01-2020','dd-mm-yyyy'), 260, 0.2);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(6, 16, 'Gabi', 'Oprea', 'Gabi.Oprea@yahoo.com', '0726782236', to_date('16-03-2020','dd-mm-yyyy'), 280, 0.6);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(2, 17, 'Smaranda', 'Ilie', 'Smaranda.Ilie@yahoo.com', '0734522089', to_date('21-04-2020','dd-mm-yyyy'), 200, 0.1);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(4, 18, 'Anastasia', 'Popa', 'Anastasia.Popa@gmail.com', '0734512907', to_date('09-09-2020','dd-mm-yyyy'), 200, 0.2);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(3, 19, 'Iulia', 'Muresan', 'Iulia.Muresan@gmail.com', '0712754489', to_date('14-05-2020','dd-mm-yyyy'), 200, 0.2);
+insert into ANGAJATI_PROIECT(id_manageri,id_angajati, prenume_angajat, nume_angajat, email_angajat, telefon_angajat, data_angajare, salariul_angajat, comision)
+values(16, 20, 'Andreea', 'Neagu', 'Andreea.Neagu@gmail.com', '0732113289', to_date('12-12-2019','dd-mm-yyyy'), 250, 0.4);
